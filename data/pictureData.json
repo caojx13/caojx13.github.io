@@ -1,5 +1,9 @@
-﻿// JSON Document
+<<<<<<< HEAD
+// JSON Document
 // 更改了编码
+=======
+
+>>>>>>> 842bc33efb7c2f94672ac5d61504b9dedaf3ba76
 {
 "pictureInfo": [
 { "src":"https://github.com/caojx13/caojx13.github.io/blob/master/images/0.jpg" , 

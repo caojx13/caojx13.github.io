@@ -1,0 +1,7 @@
+diff a/data/pictureData.json b/data/pictureData.json	(rejected hunks)
+@@ -1,4 +0,4 @@
+-// JSON Document
++﻿// JSON Document
+ // 更改了编码
+ {
+ "pictureInfo": [
