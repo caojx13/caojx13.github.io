@@ -2,17 +2,10 @@
 <html> 
 <head> 
 <meta charset="UTF-8"> 
-<title>WaterFallDemo</title>
-<script type="text/javascript" src="js/jquery-1.11.3.min.js"></script> 
+<title>瀑布流</title>
+<script type="text/javascript" src="http://caojx13.github.io/js/jquery-1.11.3.min.js"></script> 
+
 <style type="text/css">
-.bigpicture
-{
-visibility:	hidden;
-z-index:3;
-background:#cecece;
-height:100%;
-width:100%;
-} 
 .BackToTop{
 width:auto;
 height:auto;
@@ -37,16 +30,16 @@ background-color:RGB(232,231,226);
 .all{ 
 
 margin:10px auto; 
-width:1000px; 
+width:90%; 
 } 
 .number{ 
 
 float:left; 
-width:225px; 
+width:25%; 
 } 
 .content 
 { 
-margin:5px; 
+margin:5%; 
 background-color:white; 
 } 
 .pic{ 
@@ -55,7 +48,8 @@ opacity: 1;
 -webkit-transition-timing-function: ease-out;
 -webkit-transition-duration: 500ms;
 box-shadow:0px 0px 15px #888888;
-margin:5px; 
+margin:5%;
+width:90%;
 }
 .pic:hover{
 opacity: .5;
@@ -63,8 +57,10 @@ opacity: .5;
 -webkit-transition-timing-function: ease-out;
 -webkit-transition-duration: 500ms;
 box-shadow:0px 0px 0px #888888; 
-margin:5px;
-} 
+margin:0;
+width:100%;
+}
+
 .loading{ 
 position: fixed; 
 width:100%; 
@@ -75,57 +71,70 @@ text-align:center;
 background-color:RGB(189,203,207); 
 z-index:1;
 } 
+#commentDiv{
+	position:fixed;
+	margin-left:25%;
+	margin-top:10%;
+	width:50%;
+	height:50%;
+	background:rgba(255,255,255,0.5);
+	font:"微软雅黑";
+	}
+.showCommentButton{
+	text-align:center;
+	background-color: rgba(0,0,0,0.5);
+  	border-radius: 25px / 17px;
+ 	line-height: 30px;
+	
+	}
 </style> 
 
 </head> 
 <body> 
-
+<h1 style="text-align:center;margin:20px auto;font:bold;">PhotoWall</h1>
 <div id="all" class="all"> 
-<div id="one" class="number"> 
+<div id="columnOne" class="number"> 
 </div> 
-<div id="two" class="number"> 
+<div id="columnTwo" class="number"> 
 </div> 
-<div id="three" class="number"> 
+<div id="columnThree" class="number"> 
 </div> 
-<div id="four" class="number"> 
+<div id="columnFour" class="number"> 
 </div> 
 </div> 
 
 <div class="BackToTop" id="BackToTop" style="display:none;">BackToTop</div>
 <div id="loading" class="loading"> 
-<img src="images/loading.gif"/> 
+<img src="src/loading.gif"/> 
 </div> 
 <div id="outerdiv" style="position:fixed;top:0;left:0;background:rgba(0,0,0,0.7);z-index:999;width:100%;height:100%;display:none;">
     
-    <div id="innerdiv" style="position:absolute;"><img id="bigimg" style="border:5px solid #fff;"  /></div>
+    <div id="innerdiv" style="position:absolute;"><img id="bigimg" style="border:5px solid #fff;display:none;"  /></div>
+    <div id="commentDiv" style="border:5px solid #fff;display:none;">
+    <img src="src/close.png" id = "close" style="height:30px;width:30px;top:-15px;right:-15px;;position:absolute;cursor:pointer;" />
+    <h1>title</h1>
+    <hr>
+    <h3>正文</h3>
+    <img src="src/last.png" id = "last" style="height:50px;width:75px;bottom:0;position:absolute;cursor:pointer;"/>
+    <img src="src/next.png" id = "next" style="height:50px;width:75px;bottom:0;right:0;position:absolute;cursor:pointer;"/>
+    </div>
 </div> 
 
 <script type="text/javascript"> 
-
+var picInfo = new Array();
+var picArray = new Array();
+var Length;
 window.onload = function () { 
 var reset = 0; 
-var surplusHeight = 800; //差值 
-var imgWidth = "206px"; //img的宽度 
-var imgHeight = 0; //img的高度 
+var surplusHeight = 800;  
+var imgHeight = 0;  
 var textHeight = 0;  
 var bigDivCount = 5; 
-var div1 = $("one"); 
-var div2 = $("two"); 
-var div3 = $("three"); 
-var div4 = $("four"); 
-var loading = $("loading"); 
-
-
-//数据源 
-var imgArray = [];  
-var commentArray = []; 
-var geoCoordinateArray = [];
-for(var i = 0 ; i<20 ;i++)
-{
-	commentArray[i] = "the "+i+" img";
-	imgArray[i] = "images/"+i+".jpg";
-	}
-
+var div1 = document.getElementById("columnOne"); 
+var div2 = document.getElementById("columnTwo"); 
+var div3 = document.getElementById("columnThree"); 
+var div4 = document.getElementById("columnFour"); 
+var loading = document.getElementById("loading"); 
 
 
 document.onreadystatechange = loadinglogo;
@@ -141,15 +150,11 @@ loadImg();
 window.onscroll = fun_scroll; 
  
 function fun_scroll() { 
- 
 var topAll =  document.body.scrollHeight; 
- 
 var top_top = document.body.scrollTop || document.documentElement.scrollTop; 
- 
-
 if (reset == 0) { 
 var topAll =  document.body.scrollHeight; 
-var top_top = document.body.scrollTop || document.documentElement.scrollTop; 
+var top_top = document.body.scrollTop || document.documentElement.scrollTop;  
 var result = topAll - top_top; 
 if (result < surplusHeight)
 { 
@@ -160,10 +165,11 @@ reset = 1;
 reset = 0; 
 } 
 } 
- 
+
 function loadImg() { 
  
 for (var i = 0; i < bigDivCount; i++) { 
+
 div1.appendChild(addDiv()); 
 div2.appendChild(addDiv()); 
 div3.appendChild(addDiv()); 
@@ -172,34 +178,34 @@ div4.appendChild(addDiv());
 } 
  
 function addDiv() { 
- 
-var ran = Math.round(Math.random() * (imgArray.length - 1)); 
- 
-var small_div = document.createElement("div"); 
-small_div.innerHTML = commentArray[ran]; 
 
+ 
+var ran = Math.round(Math.random() * 19); 	
+getPictureInfo(ran);
+var small_div = document.createElement("div"); 
+small_div.innerHTML = "计算中";
 var imgToShow = document.createElement("img"); 
 imgToShow.className = "pic";
-imgToShow.alt = "图片加载失败";
-imgToShow.style.zIndex = 5; 
-imgToShow.src = imgArray[ran]; 
-imgToShow.style.width = imgWidth; 
+imgToShow.alt = "图片加载失败"; 
+imgToShow.src = "http://caojx13.github.io/images/loading.gif"; 
 imgToShow.style.cursor = "pointer";
-
-
-
-imgToShow.onclick = function(){imgShow(imgToShow);};
-//包含img的层 
+imgToShow.onclick = function(){showImg(imgToShow);};
+var showCommentButton = document.createElement("button"); 
+showCommentButton.className = "showCommentButton";
+showCommentButton.innerHTML = "ViewComment";
+showCommentButton.onclick = function(){
+		
+		showComment(picInfo[1]);
+	};
 var div = document.createElement("div"); 
 div.className = "content";
 div.appendChild(imgToShow); 
 div.appendChild(small_div); 
+div.appendChild(showCommentButton);
+picArray.push(div);
 return div; 
 } 
-//通过id得到对象 
-function $(id) { 
-return document.getElementById(id); 
-} 
+
 } 
 
 $(function(){
@@ -214,41 +220,115 @@ $(function(){
 			});	
 	}
 	})
- function imgShow(_this){
-		var src = _this.src;
-		$("#bigimg").attr("src", src);
-		$("<img/>").attr("src", src).load(function(){
-			var windowW = $(window).width();
-			var windowH = $(window).height();
-			var realWidth = this.width;
-			var realHeight = this.height;
-			var imgWidth, imgHeight;
-			var scale = 0.8;
-			
-			if(realHeight>windowH*scale) {
-				imgHeight = windowH*scale;
-				imgWidth = imgHeight/realHeight*realWidth;
-				if(imgWidth>windowW*scale) {
-					imgWidth = windowW*scale;
-				}
-			} else if(realWidth>windowW*scale) {
+function showComment(comment)
+{
+	var i = 0;
+	$("h3").html(comment[0]);
+	
+	$("#commentDiv").css("display","block");
+	$("#outerdiv").fadeIn("fast");
+	$("#next").click(function(){
+		if(i<2)
+		{i=i+1;
+		$("h3").html(comment[i]);}
+	});
+	$("#last").click(function(){
+		if(i>0)
+		{i=i-1;
+		$("h3").html(comment[i]);}
+	});
+	$("#close").click(function(){
+		$("#commentDiv").css("display","none");
+		$("#outerdiv").fadeOut("fast");
+	});
+}
+
+function clacLength(){
+	var MLonA,MLatA,MLonB,MLatB,C,Distance;
+	if(navigator.geolocation){
+		navigator.geolocation.getCurrentPosition(function(pos){
+			MLatA = (90 - pos.coords.latitude)*Math.PI/180;
+			MLonA = pos.coords.longitude*Math.PI/180;
+			MLatB = (90 - picInfo[2])*Math.PI/180;
+			MLonB = picInfo[3]*Math.PI/180;
+			C = Math.sin(MLatA)*Math.sin(MLatB)*Math.cos(MLonA-MLonB) + Math.cos(MLatA)*Math.cos(MLatB);
+			Distance = 6371*Math.acos(C)*Math.PI/180;
+			Length = "距你"+Distance+"千米";
+			})
+		}
+	}; 
+function showImg(_this){
+	$("#bigimg").css("display","block");
+	$("#bigimg").attr("src", _this.src).load(function(){
+		var windowW = $(window).width();
+		var windowH = $(window).height();
+		var realWidth = this.width;
+		var realHeight = this.height;
+		var imgWidth, imgHeight;
+		var scale = 0.8;
+		
+		if(realHeight>windowH*scale) {
+			imgHeight = windowH*scale;
+			imgWidth = imgHeight/realHeight*realWidth;
+			if(imgWidth>windowW*scale) {
 				imgWidth = windowW*scale;
-				imgHeight = imgWidth/realWidth*realHeight;
-			} else {
-				imgWidth = realWidth;
-				imgHeight = realHeight;
 			}
-			$("#bigimg").css("width",imgWidth);
-			
-			var w = (windowW-imgWidth)/2;
-			var h = (windowH-imgHeight)/2;
-			$("#innerdiv").css({"top":h, "left":w});
-			$("#outerdiv").fadeIn("fast");
-		});
-		$("#outerdiv").click(function(){
-			$(this).fadeOut("fast");
-		});
+		} else if(realWidth>windowW*scale) {
+			imgWidth = windowW*scale;
+			imgHeight = imgWidth/realWidth*realHeight;
+		} else {
+			imgWidth = realWidth;
+			imgHeight = realHeight;
+		}
+		$("#bigimg").css("width",imgWidth);
+		
+		var w = (windowW-imgWidth)/2;
+		var h = (windowH-imgHeight)/2;
+		$("#innerdiv").css({"top":h, "left":w});
+		$("#outerdiv").fadeIn("fast");
+	});
+	$("#outerdiv").click(function(){
+		$("#bigimg").css("display","none");
+		$(this).fadeOut("fast");
+		$("#outerdiv").unbind("click");
+	});
 	}
+function getPictureInfo(num)
+{ 
+	
+	var xhr = new XMLHttpRequest();
+	var pictureInfo = new Object();
+	var requestResult;
+	xhr.onreadystatechange = function()
+	{
+		if (xhr.readyState == 4)
+		{
+			if ((xhr.status >= 200 && xhr.status < 300) || xhr.status== 304)
+			{
+				
+				requestResult = xhr.responseText;
+				pictureInfo = eval("("+requestResult+")");
+				
+				picArray[0].childNodes[0].src = pictureInfo.pictureInfo[num].src;
+				
+				picInfo[1] = pictureInfo.pictureInfo[num].comment;
+				picInfo[2] = pictureInfo.pictureInfo[num].latitude;
+				picInfo[3] = pictureInfo.pictureInfo[num].longitude;
+				clacLength();
+				picArray[0].childNodes[1].innerHTML = Length;
+				
+				picArray.shift();
+				
+			} 
+			else {alert("Request was unsuccessful: " + xhr.status);}
+		}
+		
+		
+	};
+	xhr.open("GET", "http://caojx13.github.io/data/pictureData.json", true);
+	xhr.send();
+}
+
 </script>  
 </body> 
 </html>
