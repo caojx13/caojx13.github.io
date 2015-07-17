@@ -1,0 +1,58 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>无标题文档</title>
+ <script src="http://caojx13.github.io/js/firebase.js"></script>
+ <script src="http://caojx13.github.io/js/jquery-1.11.3.min.js"></script>
+</head>
+
+<body>
+<div id="chatBox">
+<div id="userId">
+<p>id:<input type="text" id="nameInput" placeholder="enter a username..."></p>
+
+</div>
+<div id="userText">
+<p>text:<input type="text" id="messageInput"  placeholder="Type a message..."></p>
+</div>
+<div id="showText">
+</div>
+</div>
+<script type="text/javascript">
+var messagesRef = new Firebase("https://shining-inferno-9997.firebaseio.com");
+var messageField = $("#messageInput");
+var nameField = $("#nameInput");
+var messageList = $("#showText");
+messageField.keypress(function (e) {
+    if (e.keyCode == 13) {
+      //FIELD VALUES
+      var username = nameField.val();
+      var message = messageField.val();
+
+      //SAVE DATA TO FIREBASE AND EMPTY FIELD
+      messagesRef.push({name:username, text:message});
+      messageField.val('');
+    }
+  });
+   messagesRef.limitToLast(10).on("child_added", function (snapshot) {
+    //GET DATA
+    var data = snapshot.val();
+    var username = data.name || "anonymous";
+    var message = data.text;
+
+    //CREATE ELEMENTS MESSAGE & SANITIZE TEXT
+    var messageElement = $("<li>");
+    var nameElement = $("<strong class='example-chat-username'></strong>")
+    nameElement.text(username);
+    messageElement.text(message).prepend(nameElement);
+
+    //ADD MESSAGE
+    messageList.append(messageElement)
+
+    //SCROLL TO BOTTOM OF MESSAGE LIST
+    messageList[0].scrollTop = messageList[0].scrollHeight;
+  });
+</script>
+</body>
+</html>
